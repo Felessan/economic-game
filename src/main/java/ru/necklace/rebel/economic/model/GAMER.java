@@ -11,6 +11,10 @@ public class GAMER {
     double manyGames; //финансы на конец хода
     double stTov; //стоимость купленного товара - вынести в другой класс подсчет?
 
+    public GAMER(String nameGamer, double startMany) {
+        this.nameGamer = nameGamer;
+        this.startMany = startMany;
+    }
 
     public static double many (double startMany, double stTov)
     {

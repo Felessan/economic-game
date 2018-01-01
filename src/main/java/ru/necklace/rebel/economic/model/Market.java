@@ -1,7 +1,7 @@
 package ru.necklace.rebel.economic.model;
 
 import java.util.Properties;
-
+                            //логика рынка, массив участников, массив товаров
 public class Market {
 
     private double coefLargeSales;

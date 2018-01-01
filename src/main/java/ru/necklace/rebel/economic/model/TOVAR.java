@@ -7,12 +7,19 @@ public class TOVAR {
     double tsenaTov;
     int colvoPocupTov; //вводится игроком
     double tsenaPokupTov;
+    double tsenaTekush;
+
+    public TOVAR(String nameTov, int startColvoTov, double tsenaTov) {
+        this.nameTov = nameTov;
+        this.startColvoTov = startColvoTov;
+        this.tsenaTov = tsenaTov;
+    }
 
     public static double StoimostTov(double tsenaTov, double tsenaPokupTov, int colvoPocupTov) {
         tsenaPokupTov = colvoPocupTov*tsenaTov;
         return tsenaPokupTov;
     }      //рассчет цены товара во время покупки.
-           //количесво покупаемого товара вводится игроком - где?? Предположительно отдельный метод
+           //количество покупаемого товара вводится игроком - где?? Предположительно отдельный метод
 
     public static int colvoTovFin(int startColvoTov, int colvoTov, int colvoPocupTov){
         colvoTov=startColvoTov-colvoPocupTov;
