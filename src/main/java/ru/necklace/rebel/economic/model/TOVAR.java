@@ -26,10 +26,9 @@ public class TOVAR {
         return colvoTov;
     }
 
-    public static double tsenaTovOne(double tsenaTov, int startColvoTov, int colvoTov) {
+    public static void tsenaTovOne(double tsenaTov, int startColvoTov, int colvoTov) {
         int k=0; //коэффициент из фаила
         tsenaTov = tsenaTov*(1+k)*(startColvoTov-colvoTov)/startColvoTov;  //k - коэффициент из фаила
         //новая цена = старая цена * (1 + коэффициент * (начальное количество на рынке - текущее количество на рынке) / начальное количество на рынке
-        return tsenaTov;
     }
 }
