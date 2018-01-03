@@ -17,7 +17,7 @@ public class ChangeInputWindow extends JDialog implements ActionListener {
 
     public ChangeInputWindow(JFrame parent, EconomicSituation gameLogic, int fontSize) {
         this.resourceList = new JComboBox(gameLogic.getItemsIncomeCorrection().keySet().toArray(new String[0]));
-        this.resourceList.setFont(new Font(this.resourceList.getFont().getName(), 1, fontSize));
+        this.resourceList.setFont(new Font(this.resourceList.getFont().getName(), Font.BOLD, fontSize));
         this.resourceList.addActionListener(this);
         JPanel panel = new JPanel();
         panel.setLayout(new FlowLayout());
@@ -49,7 +49,7 @@ public class ChangeInputWindow extends JDialog implements ActionListener {
                     this.inputChangeField.setText("");
                 }
             } else {
-                this.info.getItemsIncomeCorrection().put((String)this.resourceList.getSelectedItem(), Integer.valueOf(0));
+                this.info.getItemsIncomeCorrection().put((String)this.resourceList.getSelectedItem(), 0);
             }
         }
 

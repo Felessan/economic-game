@@ -1,5 +1,6 @@
 package ru.necklace.rebel.economic.gui;
 
+import com.sun.org.apache.xalan.internal.xsltc.compiler.util.StringStack;
 import ru.necklace.rebel.economic.data.CommandInfo;
 import ru.necklace.rebel.economic.model.EconomicSituation;
 import ru.necklace.rebel.economic.data.ItemInfo;
@@ -34,6 +35,7 @@ public class ControlWindow extends JFrame implements ActionListener, TableModelL
     private JButton finishGameButton;
     private JFileChooser fc;
     private JTextField choosedFilePathField;
+    private JComboBox fontSizeChooser;
     //static Logger logger = LogManager.getLogger(ControlWindow.class);
     private EconomicSituation gameLogic;
     private InfoWindow infoWindow;
@@ -54,7 +56,9 @@ public class ControlWindow extends JFrame implements ActionListener, TableModelL
         this.nextTurnButton = new JButton("Совершить ход", this.nextIcon);
         this.finishGameButton = new JButton("Завершить игру", this.finishIcon);
         this.choosedFilePathField = new JTextField(80);
-        this.setDefaultCloseOperation(3);
+        this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        fontSizeChooser = new JComboBox(new Integer[]{6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+        26, 28, 30, 32, 36, 40, 44});
         this.gameLogic = gameTurnListener;
         this.initGui();
     }
@@ -67,40 +71,44 @@ public class ControlWindow extends JFrame implements ActionListener, TableModelL
         this.fc.setFileFilter(this.getXlsFileFilter());
         this.fc.setAcceptAllFileFilterUsed(false);
         this.openButton.addActionListener(this);
-        this.openButton.setFont(new Font(this.openButton.getFont().getName(), 1, this.fontSize));
+        this.openButton.setFont(new Font(this.openButton.getFont().getName(), Font.BOLD, this.fontSize));
         this.runGameButton.setEnabled(false);
-        this.runGameButton.setFont(new Font(this.runGameButton.getFont().getName(), 1, this.fontSize));
+        this.runGameButton.setFont(new Font(this.runGameButton.getFont().getName(), Font.BOLD, this.fontSize));
         this.runGameButton.addActionListener(this);
+        fontSizeChooser.setFont(new Font(fontSizeChooser.getFont().getName(), Font.BOLD, fontSize));
+        fontSizeChooser.setSelectedItem(fontSize);
+        fontSizeChooser.addActionListener(this);
         JPanel buttonPanel = new JPanel();
         buttonPanel.add(this.openButton);
         buttonPanel.add(this.runGameButton);
-        this.choosedFilePathField.setFont(new Font(this.choosedFilePathField.getFont().getName(), 1, this.fontSize));
+        buttonPanel.add(fontSizeChooser);
+        this.choosedFilePathField.setFont(new Font(this.choosedFilePathField.getFont().getName(), Font.BOLD, this.fontSize));
         fileLoaderPane.add(buttonPanel, "First");
         fileLoaderPane.add(this.choosedFilePathField, "Center");
         fileLoaderPane.setBorder(BorderFactory.createEtchedBorder());
         contentPane.add(fileLoaderPane, new GridBagConstraints(2, 0, 2, 2, 1.0D, 1.0D, 11, 2, new Insets(0, 0, 0, 0), 0, 0));
         JPanel controlPane = new JPanel(new FlowLayout());
-        this.prevTurnButton.setFont(new Font(this.prevTurnButton.getFont().getName(), 0, this.fontSize));
+        this.prevTurnButton.setFont(new Font(this.prevTurnButton.getFont().getName(), Font.PLAIN, this.fontSize));
         this.prevTurnButton.setEnabled(false);
         this.prevTurnButton.addActionListener(this);
         controlPane.add(this.prevTurnButton);
-        this.nextTurnButton.setFont(new Font(this.nextTurnButton.getFont().getName(), 0, this.fontSize));
+        this.nextTurnButton.setFont(new Font(this.nextTurnButton.getFont().getName(), Font.PLAIN, this.fontSize));
         this.nextTurnButton.addActionListener(this);
         this.nextTurnButton.setEnabled(false);
         controlPane.add(this.nextTurnButton);
-        this.finishGameButton.setFont(new Font(this.finishGameButton.getFont().getName(), 0, this.fontSize));
+        this.finishGameButton.setFont(new Font(this.finishGameButton.getFont().getName(), Font.PLAIN, this.fontSize));
         this.finishGameButton.setEnabled(false);
         this.finishGameButton.addActionListener(this);
         controlPane.add(this.finishGameButton);
         this.changeInputButton.addActionListener(this);
         this.changeInputButton.setEnabled(false);
-        this.changeInputButton.setFont(new Font(this.changeInputButton.getFont().getName(), 1, this.fontSize));
+        this.changeInputButton.setFont(new Font(this.changeInputButton.getFont().getName(), Font.BOLD, this.fontSize));
         controlPane.add(this.changeInputButton);
         controlPane.setBorder(BorderFactory.createEtchedBorder());
         contentPane.add(controlPane, new GridBagConstraints(0, 3, 4, 1, 1.0D, 1.0D, 10, 2, new Insets(0, 0, 0, 0), 0, 0));
         this.setContentPane(contentPane);
-        this.setPreferredSize(new Dimension(1024, 600));
-        this.setResizable(false);
+        //this.setPreferredSize(new Dimension(1024, 600));
+        //this.setResizable(false);
     }
 
     protected FileFilter getXlsFileFilter() {
@@ -145,13 +153,11 @@ public class ControlWindow extends JFrame implements ActionListener, TableModelL
         } else if (e.getSource() == this.runGameButton) {
             try {
                 this.gameLogic.load(this.choosedFilePathField.getText());
-                this.infoWindow = new InfoWindow(this, this, this.gameLogic);
-                this.infoWindow.pack();
+                this.infoWindow = new InfoWindow(this, this, this.gameLogic, (Integer) fontSizeChooser.getSelectedItem());
                 this.infoWindow.setVisible(true);
                 this.infoWindow.showMarket(this.gameLogic.getMarket());
                 this.infoWindow.showPlayers(this.gameLogic.getCommands());
                 this.infoWindow.pack();
-                this.infoWindow.setResizable(false);
                 this.infoWindow.setLocationRelativeTo(this);
                 this.nextTurnButton.setEnabled(true);
                 this.finishGameButton.setEnabled(true);
@@ -172,7 +178,30 @@ public class ControlWindow extends JFrame implements ActionListener, TableModelL
         } else if (e.getSource().equals(this.finishGameButton)) {
             System.exit(0);
         } else if (e.getSource().equals(this.changeInputButton)) {
-            (new ChangeInputWindow(this, this.gameLogic, this.fontSize)).setVisible(true);
+            (new ChangeInputWindow(this, this.gameLogic, (Integer) fontSizeChooser.getSelectedItem())).setVisible(true);
+        }
+        else if (e.getSource().equals(fontSizeChooser)){
+            openButton.setFont(new Font(openButton.getFont().getName(), Font.BOLD, (Integer) fontSizeChooser.getSelectedItem()));
+            runGameButton.setFont(new Font(runGameButton.getFont().getName(), Font.BOLD, (Integer) fontSizeChooser.getSelectedItem()));
+            changeInputButton.setFont(new Font(changeInputButton.getFont().getName(), Font.BOLD, (Integer) fontSizeChooser.getSelectedItem()));
+            prevTurnButton.setFont(new Font(prevTurnButton.getFont().getName(), Font.BOLD, (Integer) fontSizeChooser.getSelectedItem()));
+            nextTurnButton.setFont(new Font(nextTurnButton.getFont().getName(), Font.BOLD, (Integer) fontSizeChooser.getSelectedItem()));
+            finishGameButton.setFont(new Font(finishGameButton.getFont().getName(), Font.BOLD, (Integer) fontSizeChooser.getSelectedItem()));
+            choosedFilePathField.setFont(new Font(choosedFilePathField.getFont().getName(), Font.BOLD, (Integer) fontSizeChooser.getSelectedItem()));
+            fontSizeChooser.setFont(new Font(fontSizeChooser.getFont().getName(), Font.BOLD, (Integer) fontSizeChooser.getSelectedItem()));
+            validate();
+            pack();
+            repaint();
+            if (infoWindow != null) {
+                infoWindow.dispose();
+                infoWindow.setVisible(false);
+                this.infoWindow = new InfoWindow(this, this, this.gameLogic, (Integer) fontSizeChooser.getSelectedItem());
+                this.infoWindow.setVisible(true);
+                this.infoWindow.showMarket(this.gameLogic.getMarket());
+                this.infoWindow.showPlayers(this.gameLogic.getCommands());
+                this.infoWindow.pack();
+                this.infoWindow.setLocationRelativeTo(this);
+            }
         }
 
     }

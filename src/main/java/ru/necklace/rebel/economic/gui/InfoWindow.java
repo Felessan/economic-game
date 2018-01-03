@@ -17,12 +17,14 @@ public class InfoWindow extends JDialog {
     private JPanel marketPanel;
     private JPanel playerPanel;
     private TableModelListener contorller;
+    private int defaultFontSize = 20;
 
-    public InfoWindow(JFrame parentFrame, ControlWindow controlWindow1, EconomicSituation gameLogic) {
+    public InfoWindow(JFrame parentFrame, ControlWindow controlWindow1, EconomicSituation gameLogic, int fontSize) {
         super(parentFrame);
         this.contorller = controlWindow1;
         this.setDefaultCloseOperation(0);
         this.initGui();
+        defaultFontSize = fontSize;
     }
 
     private void initGui() {
@@ -42,10 +44,10 @@ public class InfoWindow extends JDialog {
         JTable market = new JTable(new MarketTableModel());
         MarketTableModel model = (MarketTableModel)market.getModel();
         model.load(items);
-        market.setFont(new Font(market.getFont().getName(), 0, 20));
-        market.getTableHeader().setFont(new Font(market.getFont().getName(), 1, 24));
+        market.setFont(new Font(market.getFont().getName(), Font.PLAIN, defaultFontSize));
+        market.getTableHeader().setFont(new Font(market.getFont().getName(), Font.BOLD, defaultFontSize + 4));
         market.setDefaultRenderer(String.class, new CostCellRenderer(items));
-        market.setAutoResizeMode(0);
+        market.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         TableColumnAdjuster tca = new TableColumnAdjuster(market);
         tca.adjustColumns();
         model.addTableModelListener(this.contorller);
@@ -61,9 +63,9 @@ public class InfoWindow extends JDialog {
         JTable players = new JTable(new CommandTableModel());
         CommandTableModel model = (CommandTableModel)players.getModel();
         model.load(commands);
-        players.setFont(new Font(players.getFont().getName(), 0, 20));
-        players.getTableHeader().setFont(new Font(players.getFont().getName(), 1, 24));
-        players.setAutoResizeMode(0);
+        players.setFont(new Font(players.getFont().getName(), Font.PLAIN, defaultFontSize));
+        players.getTableHeader().setFont(new Font(players.getFont().getName(), Font.BOLD, defaultFontSize + 4));
+        players.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         TableColumnAdjuster tca = new TableColumnAdjuster(players);
         tca.adjustColumns();
         model.addTableModelListener(this.contorller);
