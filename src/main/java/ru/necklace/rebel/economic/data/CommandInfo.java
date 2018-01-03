@@ -1,8 +1,9 @@
 package ru.necklace.rebel.economic.data;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class CommandInfo {
+public class CommandInfo implements Serializable {
     private String commandName;
     private long currentCash;
     private ArrayList<Long> lastCash = new ArrayList();

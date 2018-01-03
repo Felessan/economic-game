@@ -1,6 +1,8 @@
 package ru.necklace.rebel.economic.data;
 
-public class ItemInfo {
+import java.io.Serializable;
+
+public class ItemInfo implements Serializable{
     private String itemName;
     private long available = 0L;
     private long baseAvailable = -1L;

@@ -5,9 +5,10 @@ import ru.necklace.rebel.economic.utils.PropertiesName;
 import javax.swing.*;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Properties;
 
-public class Coefficients {
+public class Coefficients implements Serializable {
     private Properties coefficientsMap = new Properties();
 
     public Coefficients() {

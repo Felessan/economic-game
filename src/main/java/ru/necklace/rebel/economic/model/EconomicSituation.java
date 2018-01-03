@@ -10,27 +10,29 @@ import ru.necklace.rebel.economic.data.CommandInfo;
 import ru.necklace.rebel.economic.data.ItemInfo;
 import ru.necklace.rebel.economic.utils.PropertiesName;
 
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public class EconomicSituation {
+public class EconomicSituation implements Serializable{
     int step = 0;
     private ArrayList<ItemInfo> items = new ArrayList<>();
     private ArrayList<CommandInfo> commands = new ArrayList<>();
     private Coefficients coefficients;
     private ArrayList<EconomicSituation> history = new ArrayList<>();
     private Map<String, Integer> itemsIncomeCorrection = new HashMap<>();
+    private String gameName;
 
-    public Map<String, Integer> getItemsIncomeCorrection() {
-        return this.itemsIncomeCorrection;
+    public EconomicSituation(Coefficients coefficientsMap, String gameName) {
+        this.coefficients = coefficientsMap;
+        this.gameName = gameName;
     }
 
     public EconomicSituation(Coefficients coefficientsMap) {
         this.coefficients = coefficientsMap;
+        this.gameName = "TestGame";
     }
 
     public ArrayList<ItemInfo> getMarket() {
@@ -41,6 +43,9 @@ public class EconomicSituation {
         return this.commands;
     }
 
+    public Map<String, Integer> getItemsIncomeCorrection() {
+        return this.itemsIncomeCorrection;
+    }
     /**
      * Загрузка начальной ситуации из файла
      * @param dataPath - путь до файла с исходными данными
@@ -160,7 +165,7 @@ public class EconomicSituation {
         ++this.step;
 
         //Костыльным образом делаем слепок текущей рыночной ситуации
-        EconomicSituation prevTurnSituation = new EconomicSituation(this.coefficients);
+        EconomicSituation prevTurnSituation = new EconomicSituation(this.coefficients, this.gameName);
 
         //Перебираем все товары на рынке
         Iterator i$ = this.items.iterator();
@@ -226,5 +231,17 @@ public class EconomicSituation {
             this.commands = ((EconomicSituation)this.history.get(this.history.size() - 1)).getCommands();
             this.history.remove(this.history.size() - 1);
         }
+    }
+
+    public void setGameName(String gameName) {
+        this.gameName = gameName;
+    }
+
+    public String getGameName() {
+        return gameName;
+    }
+
+    public int getStep() {
+        return step;
     }
 }

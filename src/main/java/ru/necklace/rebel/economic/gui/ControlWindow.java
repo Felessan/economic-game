@@ -1,6 +1,5 @@
 package ru.necklace.rebel.economic.gui;
 
-import com.sun.org.apache.xalan.internal.xsltc.compiler.util.StringStack;
 import ru.necklace.rebel.economic.data.CommandInfo;
 import ru.necklace.rebel.economic.model.EconomicSituation;
 import ru.necklace.rebel.economic.data.ItemInfo;
@@ -15,8 +14,7 @@ import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 
 public class ControlWindow extends JFrame implements ActionListener, TableModelListener {
     private int fontSize = 20;
@@ -33,9 +31,11 @@ public class ControlWindow extends JFrame implements ActionListener, TableModelL
     private JButton prevTurnButton;
     private JButton nextTurnButton;
     private JButton finishGameButton;
-    private JFileChooser fc;
+    private JFileChooser newGameDataFileChooser;
+    private JFileChooser loadGameDataFileChooser;
     private JTextField choosedFilePathField;
     private JComboBox fontSizeChooser;
+    private JButton loadGameButton;
     //static Logger logger = LogManager.getLogger(ControlWindow.class);
     private EconomicSituation gameLogic;
     private InfoWindow infoWindow;
@@ -50,7 +50,8 @@ public class ControlWindow extends JFrame implements ActionListener, TableModelL
         this.previousIcon = createImageIcon("icons" + File.separator + "previous.png");
         this.finishIcon = createImageIcon("icons" + File.separator + "finish.png");
         this.openButton = new JButton("Выбрать файл", this.chooseInputDataIcon);
-        this.runGameButton = new JButton("Загрузить данные из файла", this.loadInputDataIcon);
+        this.runGameButton = new JButton("Загрузить начальные данные из файла", this.loadInputDataIcon);
+        this.loadGameButton = new JButton("Продолжить игру из сохранения");
         this.changeInputButton = new JButton("Настроить добычу");
         this.prevTurnButton = new JButton("Вернуться на ход", this.previousIcon);
         this.nextTurnButton = new JButton("Совершить ход", this.nextIcon);
@@ -66,10 +67,16 @@ public class ControlWindow extends JFrame implements ActionListener, TableModelL
     private void initGui() {
         JPanel contentPane = new JPanel(new GridBagLayout());
         JPanel fileLoaderPane = new JPanel(new BorderLayout());
-        this.fc = new JFileChooser();
-        this.fc.setCurrentDirectory(new File("."));
-        this.fc.setFileFilter(this.getXlsFileFilter());
-        this.fc.setAcceptAllFileFilterUsed(false);
+        this.newGameDataFileChooser = new JFileChooser();
+        this.newGameDataFileChooser.setCurrentDirectory(new File("."));
+        this.newGameDataFileChooser.setFileFilter(this.getXlsFileFilter());
+        this.newGameDataFileChooser.setAcceptAllFileFilterUsed(false);
+
+        this.loadGameDataFileChooser = new JFileChooser();
+        this.loadGameDataFileChooser.setCurrentDirectory(new File("."));
+        this.loadGameDataFileChooser.setFileFilter(this.getSaveFileFilter());
+        this.loadGameDataFileChooser.setAcceptAllFileFilterUsed(false);
+
         this.openButton.addActionListener(this);
         this.openButton.setFont(new Font(this.openButton.getFont().getName(), Font.BOLD, this.fontSize));
         this.runGameButton.setEnabled(false);
@@ -106,6 +113,9 @@ public class ControlWindow extends JFrame implements ActionListener, TableModelL
         controlPane.add(this.changeInputButton);
         controlPane.setBorder(BorderFactory.createEtchedBorder());
         contentPane.add(controlPane, new GridBagConstraints(0, 3, 4, 1, 1.0D, 1.0D, 10, 2, new Insets(0, 0, 0, 0), 0, 0));
+        loadGameButton.setFont(new Font(this.loadGameButton.getFont().getName(), Font.PLAIN, this.fontSize));
+        loadGameButton.addActionListener(this);
+        contentPane.add(loadGameButton, new GridBagConstraints(0, 4, 4, 1, 1.0D, 1.0D, 10, 2, new Insets(0, 0, 0, 0), 0, 0));
         this.setContentPane(contentPane);
         //this.setPreferredSize(new Dimension(1024, 600));
         //this.setResizable(false);
@@ -134,6 +144,29 @@ public class ControlWindow extends JFrame implements ActionListener, TableModelL
         };
     }
 
+    protected FileFilter getSaveFileFilter() {
+        return new FileFilter() {
+            public boolean accept(File file) {
+                if (file.isDirectory()) {
+                    return true;
+                } else {
+                    String extension = null;
+                    String s = file.getName();
+                    int i = s.lastIndexOf(46);
+                    if (i > 0 && i < s.length() - 1) {
+                        extension = s.substring(i + 1).toLowerCase();
+                    }
+
+                    return extension != null && extension.equals("sav");
+                }
+            }
+
+            public String getDescription() {
+                return ".sav Files";
+            }
+        };
+    }
+
     protected static ImageIcon createImageIcon(String path) {
         try {
             return new ImageIcon(path);
@@ -145,14 +178,17 @@ public class ControlWindow extends JFrame implements ActionListener, TableModelL
 
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == this.openButton) {
-            int returnVal = this.fc.showOpenDialog(this);
+            int returnVal = this.newGameDataFileChooser.showOpenDialog(this);
             if (returnVal == 0) {
-                this.choosedFilePathField.setText(this.fc.getSelectedFile().getPath());
+                this.choosedFilePathField.setText(this.newGameDataFileChooser.getSelectedFile().getPath());
                 this.runGameButton.setEnabled(true);
             }
         } else if (e.getSource() == this.runGameButton) {
             try {
                 this.gameLogic.load(this.choosedFilePathField.getText());
+                gameLogic.setGameName(new File(choosedFilePathField.getText()).getName()
+                        .substring(0,
+                                new File(choosedFilePathField.getText()).getName().lastIndexOf(".")));
                 this.infoWindow = new InfoWindow(this, this, this.gameLogic, (Integer) fontSizeChooser.getSelectedItem());
                 this.infoWindow.setVisible(true);
                 this.infoWindow.showMarket(this.gameLogic.getMarket());
@@ -171,6 +207,15 @@ public class ControlWindow extends JFrame implements ActionListener, TableModelL
             this.prevTurnButton.setEnabled(true);
             this.infoWindow.showMarket(this.gameLogic.getMarket());
             this.infoWindow.showPlayers(this.gameLogic.getCommands());
+            try {
+                File saveFile = new File("save-" + gameLogic.getGameName() + "-" + gameLogic.getStep() + ".sav");
+                saveFile.createNewFile();
+                FileOutputStream fout = new FileOutputStream(saveFile);
+                ObjectOutputStream oos = new ObjectOutputStream(fout);
+                oos.writeObject(gameLogic);
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
         } else if (e.getSource().equals(this.prevTurnButton)) {
             this.gameLogic.prevStep();
             this.infoWindow.showMarket(this.gameLogic.getMarket());
@@ -189,6 +234,7 @@ public class ControlWindow extends JFrame implements ActionListener, TableModelL
             finishGameButton.setFont(new Font(finishGameButton.getFont().getName(), Font.BOLD, (Integer) fontSizeChooser.getSelectedItem()));
             choosedFilePathField.setFont(new Font(choosedFilePathField.getFont().getName(), Font.BOLD, (Integer) fontSizeChooser.getSelectedItem()));
             fontSizeChooser.setFont(new Font(fontSizeChooser.getFont().getName(), Font.BOLD, (Integer) fontSizeChooser.getSelectedItem()));
+            loadGameButton.setFont(new Font(loadGameButton.getFont().getName(), Font.BOLD, (Integer) fontSizeChooser.getSelectedItem()));
             validate();
             pack();
             repaint();
@@ -201,6 +247,28 @@ public class ControlWindow extends JFrame implements ActionListener, TableModelL
                 this.infoWindow.showPlayers(this.gameLogic.getCommands());
                 this.infoWindow.pack();
                 this.infoWindow.setLocationRelativeTo(this);
+            }
+        }
+        else if (e.getSource().equals(loadGameButton)){
+            int returnVal = this.loadGameDataFileChooser.showOpenDialog(this);
+            if (returnVal == 0) {
+                String loadedGamePath = this.loadGameDataFileChooser.getSelectedFile().getPath();
+                try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(loadedGamePath))) {
+
+                    gameLogic = (EconomicSituation) ois.readObject();
+                    this.infoWindow = new InfoWindow(this, this, this.gameLogic, (Integer) fontSizeChooser.getSelectedItem());
+                    this.infoWindow.setVisible(true);
+                    this.infoWindow.showMarket(this.gameLogic.getMarket());
+                    this.infoWindow.showPlayers(this.gameLogic.getCommands());
+                    this.infoWindow.pack();
+                    this.infoWindow.setLocationRelativeTo(this);
+                    this.nextTurnButton.setEnabled(true);
+                    this.finishGameButton.setEnabled(true);
+                    this.changeInputButton.setEnabled(true);
+
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
             }
         }
 
